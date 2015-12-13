@@ -9,7 +9,7 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class CountAsyncTask extends AsyncTask<Double, Void, Long> {
+public class CountAsyncTask extends AsyncTask<Double, Void, String> {
 
     final OnCountListener listener;
 
@@ -17,7 +17,7 @@ public class CountAsyncTask extends AsyncTask<Double, Void, Long> {
         this.listener = listener;
     }
 
-    @Override protected Long doInBackground(Double... params) {
+    @Override protected String doInBackground(Double... params) {
         String result;
         InputStream response = null;
         String url = "https://busy-place.herokuapp.com/api/position?latitude=" + params[0]
@@ -48,10 +48,10 @@ public class CountAsyncTask extends AsyncTask<Double, Void, Long> {
             }
         }
 
-        return Long.parseLong(result);
+        return result;
     }
 
-    @Override protected void onPostExecute(Long count) {
+    @Override protected void onPostExecute(String count) {
         listener.onCount(count);
     }
 

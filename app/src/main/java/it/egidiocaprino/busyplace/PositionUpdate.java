@@ -18,16 +18,16 @@ public class PositionUpdate extends BroadcastReceiver {
         alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, 0, AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
     }
 
-    @Override public void onReceive(Context context, Intent intent) {
-        String deviceId = Global.getDeviceId(context);
-        Location location = getLocation(context);
-        new SendPositionAsyncTask().execute(deviceId, location.getLatitude(), location.getLongitude());
-    }
-
-    Location getLocation(Context context) {
+    public static Location getLastLocation(Context context) {
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
         return location;
+    }
+
+    @Override public void onReceive(Context context, Intent intent) {
+        String deviceId = Global.getDeviceId(context);
+        Location location = getLastLocation(context);
+        new SendPositionAsyncTask().execute(deviceId, location.getLatitude(), location.getLongitude());
     }
 
 }

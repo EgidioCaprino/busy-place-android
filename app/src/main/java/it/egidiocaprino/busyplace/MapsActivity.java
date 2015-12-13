@@ -1,10 +1,12 @@
 package it.egidiocaprino.busyplace;
 
 import android.graphics.Color;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
@@ -21,10 +23,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     final GeolocationService geolocationService = new GeolocationService();
     final String markerTitle = "Tap to display the count";
+    final String loadingTitle = "Loading...";
+    final float defaultZoom = 10;
+    final int circleColor = Color.argb(100, 255, 0, 0);
 
     Circle circle;
     Marker marker;
-    AsyncTask<Double, Void, Long> countAsyncTask;
+    AsyncTask<Double, Void, String> countAsyncTask;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,6 +42,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     @Override public void onMapReady(final GoogleMap googleMap) {
+        // Center in the last know location.
+        Location lastLocation = PositionUpdate.getLastLocation(this);
+        LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, defaultZoom));
+
+        // Enable my location button.
+        googleMap.setMyLocationEnabled(true);
+
         googleMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override public void onCameraChange(CameraPosition cameraPosition) {
                 LatLng center = cameraPosition.target;
@@ -49,7 +62,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     CircleOptions options = new CircleOptions().center(center).radius(radius);
                     circle = googleMap.addCircle(options);
 
-                    circle.setFillColor(Color.argb(100, 255, 0, 0));
+                    circle.setFillColor(circleColor);
                     circle.setStrokeColor(Color.RED);
                 } else {
                     circle.setCenter(center);
@@ -70,6 +83,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override public void onMapClick(LatLng latLng) {
+                marker.setTitle(loadingTitle);
+                marker.showInfoWindow();
+
                 if (countAsyncTask != null) {
                     countAsyncTask.cancel(true);
                 }
@@ -85,8 +101,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-    @Override public void onCount(Long count) {
-        marker.setTitle(count + " people");
+    @Override public void onCount(String count) {
+        String people;
+        if ("1".equals(count)) {
+            people = "person";
+        } else {
+            people = "people";
+        }
+
+        marker.setTitle(count + " " + people);
         marker.showInfoWindow();
     }
 
