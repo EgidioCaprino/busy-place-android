@@ -1,4 +1,4 @@
-package it.egidiocaprino.busyplace;
+package it.egidiocaprino.busyplace2;
 
 import android.graphics.Color;
 import android.location.Location;
@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -18,6 +19,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.VisibleRegion;
+import io.fabric.sdk.android.Fabric;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnCountListener {
 
@@ -33,6 +35,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_maps);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -44,7 +47,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override public void onMapReady(final GoogleMap googleMap) {
         // Center in the last know location.
         Location lastLocation = PositionUpdate.getLastLocation(this);
-        LatLng latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+        LatLng latLng;
+
+        if (lastLocation != null) {
+            latLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+        } else {
+            latLng = new LatLng(51.520201, -0.104800);
+        }
+
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, defaultZoom));
 
         // Enable my location button.

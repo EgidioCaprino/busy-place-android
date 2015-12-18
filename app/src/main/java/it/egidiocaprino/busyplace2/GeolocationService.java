@@ -1,4 +1,4 @@
-package it.egidiocaprino.busyplace;
+package it.egidiocaprino.busyplace2;
 
 import android.location.Location;
 import android.location.LocationManager;

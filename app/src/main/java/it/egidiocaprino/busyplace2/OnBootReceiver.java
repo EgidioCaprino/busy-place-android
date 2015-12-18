@@ -1,4 +1,4 @@
-package it.egidiocaprino.busyplace;
+package it.egidiocaprino.busyplace2;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
