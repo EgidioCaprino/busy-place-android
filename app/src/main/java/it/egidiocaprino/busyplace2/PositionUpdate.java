@@ -25,9 +25,13 @@ public class PositionUpdate extends BroadcastReceiver {
     }
 
     @Override public void onReceive(Context context, Intent intent) {
-        String deviceId = Global.getDeviceId(context);
-        Location location = getLastLocation(context);
-        new SendPositionAsyncTask().execute(deviceId, location.getLatitude(), location.getLongitude());
+        if (Global.hasPermissions(context)) {
+            String deviceId = Global.getDeviceId(context);
+            Location location = getLastLocation(context);
+            if (location != null) {
+                new SendPositionAsyncTask().execute(deviceId, location.getLatitude(), location.getLongitude());
+            }
+        }
     }
 
 }

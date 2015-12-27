@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="it.egidiocaprino.busyplace">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="it.egidiocaprino.busyplace2">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET" />
@@ -17,7 +17,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".MapsActivity" android:label="@string/title_activity_maps">
+        <activity android:name="it.egidiocaprino.busyplace2.MapsActivity" android:label="@string/title_activity_maps">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,12 +25,15 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".OnBootReceiver" android:enabled="false">
+        <receiver android:name="it.egidiocaprino.busyplace2.OnBootReceiver" android:enabled="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"></action>
             </intent-filter>
         </receiver>
-        <receiver android:name=".PositionUpdate" android:enabled="true" />
+        <receiver android:name="it.egidiocaprino.busyplace2.PositionUpdate" android:enabled="true" />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="1ea5d613954129e6f3c0ac8e011eac80cc6afb02" />
     </application>
 
 </manifest>

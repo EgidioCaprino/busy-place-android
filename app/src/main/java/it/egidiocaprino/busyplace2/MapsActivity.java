@@ -1,12 +1,16 @@
 package it.egidiocaprino.busyplace2;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -19,28 +23,33 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.VisibleRegion;
-import io.fabric.sdk.android.Fabric;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnCountListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnCountListener, ActivityCompat.OnRequestPermissionsResultCallback {
 
     final GeolocationService geolocationService = new GeolocationService();
     final String markerTitle = "Tap to display the count";
     final String loadingTitle = "Loading...";
     final float defaultZoom = 10;
     final int circleColor = Color.argb(100, 255, 0, 0);
+    final int permissionRequestCode = 1;
 
     Circle circle;
     Marker marker;
     AsyncTask<Double, Void, String> countAsyncTask;
+    SupportMapFragment mapFragment;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_maps);
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         PositionUpdate.setRepeatingIntent(this);
         OnBootReceiver.enable(this);
+
+        if (Global.hasPermissions(this)) {
+            mapFragment.getMapAsync(this);
+        } else {
+            requestLocationPermissions();
+        }
     }
 
 
@@ -121,6 +130,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         marker.setTitle(count + " " + people);
         marker.showInfoWindow();
+    }
+
+    @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == permissionRequestCode) {
+            for (int grantResult : grantResults) {
+                if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                    new AlertDialog.Builder(this)
+                        .setTitle("Warning!")
+                        .setMessage("You cannot use " + R.string.title_activity_maps + " if you do not grant Location permissions.")
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override public void onClick(DialogInterface dialog, int which) {
+                                requestLocationPermissions();
+                            }
+                        }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent intent = new Intent(Intent.ACTION_MAIN);
+                                intent.addCategory(Intent.CATEGORY_HOME);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                            }
+                        }).setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+
+                    return;
+                }
+            }
+
+            mapFragment.getMapAsync(this);
+        }
+    }
+
+    void requestLocationPermissions() {
+        ActivityCompat.requestPermissions(this, Global.requiredPermissions, permissionRequestCode);
     }
 
 }
